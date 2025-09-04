@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* MathOlymPiad Design System - Uzbek Heritage Inspired */
+
+@layer base {
+  :root {
+    /* Core Colors - Inspired by Uzbek Heritage */
+    --background: 246 100% 99%;
+    --foreground: 215 25% 27%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 27%;
+
+    /* Primary - Deep Uzbek Blue */
+    --primary: 215 84% 35%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 215 84% 55%;
+
+    /* Secondary - Golden Accent */
+    --secondary: 45 93% 58%;
+    --secondary-foreground: 215 25% 27%;
+
+    /* Muted Tones */
+    --muted: 215 25% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent - Warm Gold */
+    --accent: 43 74% 66%;
+    --accent-foreground: 215 25% 27%;
+
+    /* Success - Emerald */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning - Amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 215 25% 27%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 90%;
+    --input: 215 25% 90%;
+    --ring: 215 84% 35%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(215 84% 35%), hsl(215 84% 55%));
+    --gradient-secondary: linear-gradient(135deg, hsl(45 93% 58%), hsl(43 74% 66%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 84% 35%) 0%, hsl(215 84% 45%) 50%, hsl(45 93% 58%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(215 25% 98%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px hsl(215 25% 27% / 0.08);
+    --shadow-medium: 0 4px 16px hsl(215 25% 27% / 0.12);
+    --shadow-large: 0 8px 32px hsl(215 25% 27% / 0.16);
+    --shadow-glow: 0 0 24px hsl(215 84% 35% / 0.2);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .dark {
+    --background: 215 28% 17%;
+    --foreground: 215 20% 91%;
+
+    --card: 215 28% 17%;
+    --card-foreground: 215 20% 91%;
+
+    --popover: 215 28% 17%;
+    --popover-foreground: 215 20% 91%;
+
+    --primary: 215 84% 55%;
+    --primary-foreground: 215 28% 17%;
+    --primary-glow: 215 84% 65%;
+
+    --secondary: 45 93% 58%;
+    --secondary-foreground: 215 28% 17%;
+
+    --muted: 215 28% 25%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 43 74% 66%;
+    --accent-foreground: 215 28% 17%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 215 28% 17%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 215 20% 91%;
+
+    --border: 215 28% 25%;
+    --input: 215 28% 25%;
+    --ring: 215 84% 55%;
+
+    --shadow-soft: 0 2px 8px hsl(215 28% 10% / 0.3);
+    --shadow-medium: 0 4px 16px hsl(215 28% 10% / 0.4);
+    --shadow-large: 0 8px 32px hsl(215 28% 10% / 0.5);
+    --shadow-glow: 0 0 24px hsl(215 84% 55% / 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
