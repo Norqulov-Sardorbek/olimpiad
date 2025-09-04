@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import OneBookPage from "./pages/OneBooksPage";
+import ArticleDetail from "./pages/ArticleDetailPage"
 
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
         <Routes>
            <Route path="/" element={<Navigate to="/home" replace />} />
            <Route path="/books/:id" element={<OneBookPage />} />
+           <Route path="/articles/:id" element={<ArticleDetail />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/home" element={<Index />} />
