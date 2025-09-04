@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Calendar, User, Eye, ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import * as pdfjsLib from "pdfjs-dist"
-
 import pdfWorker from "pdfjs-dist/build/pdf.worker.min?url"
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
@@ -33,17 +32,23 @@ const truncateText = (text: string, maxLength = 100) => {
   return text.slice(0, maxLength) + "..."
 }
 
-const getPdfPreview = async (url: string, maxLength = 100) => {
+const getPdfText = async (url: string): Promise<string> => {
   try {
     const loadingTask = pdfjsLib.getDocument(url)
     const pdf = await loadingTask.promise
-    const page = await pdf.getPage(1) // faqat birinchi sahifa
-    const textContent = await page.getTextContent()
-    const text = textContent.items.map((item: any) => item.str).join(" ")
-    return text.slice(0, maxLength) + "..."
+    let fullText = ""
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const textContent = await page.getTextContent()
+      const text = textContent.items.map((item: any) => item.str).join(" ")
+      fullText += " " + text
+    }
+
+    return fullText.trim()
   } catch (e) {
-    console.error("PDF preview olishda xatolik:", e)
-    return "(PDF fayl)"
+    console.error("PDF matnini olishda xatolik:", e)
+    return ""
   }
 }
 
@@ -51,6 +56,7 @@ const ArticlesSection = () => {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [previews, setPreviews] = useState<Record<number, string>>({})
+  const [readingTimes, setReadingTimes] = useState<Record<number, number>>({})
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -60,23 +66,28 @@ const ArticlesSection = () => {
         setArticles(data)
 
         const previewMap: Record<number, string> = {}
+        const readTimeMap: Record<number, number> = {}
 
         for (const article of data) {
           if (article.pdf_file) {
-
-            previewMap[article.id] = await getPdfPreview(
-              `${BASE_URL}${article.pdf_file}`,
-              100
-            )
+            const fullText = await getPdfText(`${BASE_URL}${article.pdf_file}`)
+            previewMap[article.id] = fullText
+              ? truncateText(fullText, 100)
+              : "(PDF fayl)"
+            readTimeMap[article.id] = fullText
+              ? getReadingTime(fullText)
+              : 3
           } else if (article.content) {
             previewMap[article.id] = truncateText(article.content, 100)
-            
+            readTimeMap[article.id] = getReadingTime(article.content)
           } else {
             previewMap[article.id] = "Maqola kontenti mavjud emas"
+            readTimeMap[article.id] = 3
           }
         }
 
         setPreviews(previewMap)
+        setReadingTimes(readTimeMap)
       } catch (error) {
         console.error("Maqolalarni olishda xatolik:", error)
       } finally {
@@ -111,9 +122,7 @@ const ArticlesSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.map((article) => {
             const previewText = previews[article.id] || "(Yuklanmoqda...)"
-            const readTime = article.content
-              ? getReadingTime(article.content)
-              : 3
+            const readTime = readingTimes[article.id] || 3
 
             return (
               <Card
