@@ -4,6 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, User, Eye, ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom"
+import * as pdfjsLib from "pdfjs-dist"
+
+import pdfWorker from "pdfjs-dist/build/pdf.worker.min?url"
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -28,9 +33,24 @@ const truncateText = (text: string, maxLength = 100) => {
   return text.slice(0, maxLength) + "..."
 }
 
+const getPdfPreview = async (url: string, maxLength = 100) => {
+  try {
+    const loadingTask = pdfjsLib.getDocument(url)
+    const pdf = await loadingTask.promise
+    const page = await pdf.getPage(1) // faqat birinchi sahifa
+    const textContent = await page.getTextContent()
+    const text = textContent.items.map((item: any) => item.str).join(" ")
+    return text.slice(0, maxLength) + "..."
+  } catch (e) {
+    console.error("PDF preview olishda xatolik:", e)
+    return "(PDF fayl)"
+  }
+}
+
 const ArticlesSection = () => {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
+  const [previews, setPreviews] = useState<Record<number, string>>({})
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -38,12 +58,32 @@ const ArticlesSection = () => {
         const res = await fetch(`${BASE_URL}/articles/all/`)
         const data = await res.json()
         setArticles(data)
+
+        const previewMap: Record<number, string> = {}
+
+        for (const article of data) {
+          if (article.pdf_file) {
+
+            previewMap[article.id] = await getPdfPreview(
+              `${BASE_URL}${article.pdf_file}`,
+              100
+            )
+          } else if (article.content) {
+            previewMap[article.id] = truncateText(article.content, 100)
+            
+          } else {
+            previewMap[article.id] = "Maqola kontenti mavjud emas"
+          }
+        }
+
+        setPreviews(previewMap)
       } catch (error) {
         console.error("Maqolalarni olishda xatolik:", error)
       } finally {
         setLoading(false)
       }
     }
+
     fetchArticles()
   }, [])
 
@@ -63,23 +103,21 @@ const ArticlesSection = () => {
             Maqolalar
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Matematik ta'lim, olimpiada tayyorgarligi va eng so‘nggi yangiliklar 
+            Matematik ta'lim, olimpiada tayyorgarligi va eng so‘nggi yangiliklar
             haqida professional maqolalar.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.map((article) => {
-            const previewText = article.content
-              ? truncateText(article.content, 100)
-              : "(PDF fayl) - to‘liq ko‘rish uchun oching"
+            const previewText = previews[article.id] || "(Yuklanmoqda...)"
             const readTime = article.content
               ? getReadingTime(article.content)
-              : 3 // PDF bo‘lsa taxminiy 3 daqiqa
+              : 3
 
             return (
-              <Card 
-                key={article.id} 
+              <Card
+                key={article.id}
                 className="group cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-large border-2 hover:border-primary/20 bg-gradient-card overflow-hidden"
               >
                 <CardHeader className="pb-3">
@@ -92,7 +130,7 @@ const ArticlesSection = () => {
                       <span>{article.view_count}</span>
                     </div>
                   </div>
-                  
+
                   <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors mb-3">
                     {article.title}
                   </CardTitle>
@@ -101,7 +139,7 @@ const ArticlesSection = () => {
                     {previewText}
                   </p>
                 </CardHeader>
-                
+
                 <CardContent>
                   {article.author ? (
                     <>
@@ -112,7 +150,11 @@ const ArticlesSection = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-3 h-3" />
-                          <span>{new Date(article.published_date).toLocaleDateString("uz-UZ")}</span>
+                          <span>
+                            {new Date(article.published_date).toLocaleDateString(
+                              "uz-UZ"
+                            )}
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between mb-4">
@@ -125,14 +167,18 @@ const ArticlesSection = () => {
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-3 h-3" />
-                        <span>{new Date(article.published_date).toLocaleDateString("uz-UZ")}</span>
+                        <span>
+                          {new Date(article.published_date).toLocaleDateString(
+                            "uz-UZ"
+                          )}
+                        </span>
                       </div>
                       <span className="text-xs text-muted-foreground">
                         {readTime} daqiqa o‘qish
                       </span>
                     </div>
                   )}
-                  
+
                   <Link to={`/articles/${article.id}`}>
                     <Button className="w-full bg-gradient-primary hover:shadow-glow group-hover:scale-105 transition-all">
                       O‘qishni davom ettirish
