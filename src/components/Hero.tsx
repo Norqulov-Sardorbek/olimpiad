@@ -1,14 +1,34 @@
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users, BookOpen, FileText, Brain } from 'lucide-react';
 import heroImage from '@/assets/hero-math.jpg';
 
 const Hero = () => {
-  const stats = [
-    { icon: BookOpen, label: 'Kitoblar', value: '150+', color: 'text-primary' },
-    { icon: FileText, label: 'Maqolalar', value: '300+', color: 'text-accent' },
-    { icon: Brain, label: 'Testlar', value: '500+', color: 'text-success' },
-    { icon: Users, label: 'Talabalar', value: '10K+', color: 'text-secondary' },
-  ];
+    const [stats, setStats] = useState([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/books/get_dashboard_data/`);
+        if (!res.ok) throw new Error('Xatolik yuz berdi');
+        const data = await res.json();
+
+        // API obyektini frontend uchun massivga aylantirish
+        const mapped = [
+          { icon: BookOpen, label: 'Kitoblar', value: data.total_books, color: 'text-yellow-400' },
+          { icon: FileText, label: 'Maqolalar', value: data.total_articles, color: 'text-accent' },
+          { icon: Brain, label: 'Testlar', value: 0, color: 'text-success' }, // hozircha kommentda
+          { icon: Users, label: 'Talabalar', value: data.total_users, color: 'text-secondary' },
+        ];
+
+        setStats(mapped);
+      } catch (err) {
+        console.error('Stats fetch error:', err);
+      }
+    };
+    fetchStats();
+  }, []);
+  
 
   return (
     <section id="home" className="relative min-h-screen pt-16 overflow-hidden">
